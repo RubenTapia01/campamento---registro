@@ -9,7 +9,7 @@ const SHEET_API = 'https://script.google.com/macros/s/AKfycbxMk5piQaBgdWZtG2-xZw
 
 const SECTORES = [
   'Carpa 1','Carpa 2','Carpa 3','Carpa 4','Carpa 5','Carpa 6','Carpa 7',
-  'Carpa 8','Carpa 9','Carpa 10','Carpa 11','Carpa 12','Carpa 13','Contenedor 5'
+  'Carpa 8','Carpa 9','Carpa 10','Carpa 11','Carpa 12','Carpa 13','Contenedor 4'
 ];
 
 const estados = {};
@@ -52,12 +52,10 @@ function btnsComp() {
 function btnsCama(camarotes) {
   if (camarotes === '1 camarote')
     return [['Cama 1 Superior','Cama 1 Inferior']];
-  // 2 camarotes = 4 camas
+  // 2 camarotes = 2 camas por camarote
   return [
     ['Cama 1 Superior','Cama 1 Inferior'],
-    ['Cama 2 Superior','Cama 2 Inferior'],
-    ['Cama 3 Superior','Cama 3 Inferior'],
-    ['Cama 4 Superior','Cama 4 Inferior']
+    ['Cama 2 Superior','Cama 2 Inferior']
   ];
 }
 
@@ -248,8 +246,8 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
   }
   if (e.paso==='reg_compartimiento') {
     e.data.compartimiento = data;
-    // Contenedor 5 siempre tiene 1 camarote — va directo a cama
-    if (e.data.sector === 'Contenedor 5') {
+    if (e.data.sector === 'Contenedor 4') {
+      // Contenedor 5 siempre 1 camarote — directo a cama
       e.data.camarotes = '1 camarote';
       e.paso = 'reg_cama';
       await send(chatId,
@@ -258,17 +256,19 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
     } else {
       e.paso = 'reg_camarotes';
       await send(chatId,
-        `Compartimiento <b>${data}</b>\n\n¿Cuántos camarotes tiene tu compartimiento?`,
-        [['1 camarote','2 camarotes']]);
+        `Compartimiento <b>${data}</b>\n\n¿Cuántas camas tiene tu compartimiento?`,
+        [['2 camas (1 camarote)','4 camas (2 camarotes)']]);
     }
     return;
   }
   if (e.paso==='reg_camarotes') {
-    e.data.camarotes = data;
+    // Normalizar selección
+    const camarotes = data.includes('4') ? '2 camarotes' : '1 camarote';
+    e.data.camarotes = camarotes;
     e.paso = 'reg_cama';
     await send(chatId,
-      `${data} — ¿Cuál es tu <b>cama</b>?`,
-      btnsCama(data));
+      `¿Cuál es tu <b>cama</b>?`,
+      btnsCama(camarotes));
     return;
   }
   if (e.paso==='reg_cama') {
