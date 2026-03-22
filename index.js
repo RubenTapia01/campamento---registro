@@ -5,7 +5,7 @@ app.use(express.json());
 
 const TOKEN = '8545753030:AAFzvYB9x-7oTa4U5eeIbe58RiwFzwf2z0s';
 const TELEGRAM = `https://api.telegram.org/bot${TOKEN}`;
-const SHEET_API = 'https://script.google.com/macros/s/AKfycby0Ezr2uy-c6gUXebd6fooz75ODbQxO9PDxw_evzIQ6vFLyc3hDF5Q7zXkPDbPpGqdUsg/exec';
+const SHEET_API = 'https://script.google.com/macros/s/AKfycbxMk5piQaBgdWZtG2-xZwYNqi4WHTXeLhAaaFVynFlsn4gB9wGrrjgzHtHuC7yeAzpQCQ/exec';
 
 // Estado de conversación por usuario
 const estados = {};
