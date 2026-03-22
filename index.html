@@ -71,13 +71,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
 </style>
 </head>
 <body>
-
 <div class="hdr">
   <div class="hdr-ico">⛺</div>
-  <div>
-    <div class="hdr-title">CAMPAMENTO</div>
-    <div class="hdr-sub">Control de Hospedaje</div>
-  </div>
+  <div><div class="hdr-title">CAMPAMENTO</div><div class="hdr-sub">Control de Hospedaje</div></div>
   <div class="hdr-clock" id="clock">--:--</div>
 </div>
 
@@ -118,7 +114,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="big">Primera vez</div>
   <div class="sub">Tu DNI no está en el sistema. Completa tus datos — solo lo haces una vez.</div>
   <div class="notice">📋 La próxima vez solo ingresas tu DNI y tus datos cargarán solos.</div>
-
   <div class="sect-label">Datos personales</div>
   <div class="fg"><label class="fl">DNI</label><input class="fi" id="r-dni" type="tel" readonly style="color:var(--acc)"></div>
   <div class="fg"><label class="fl">Nombres</label><input class="fi" id="r-nombre" type="text" placeholder="Ej: Juan Carlos"></div>
@@ -132,7 +127,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
     <select class="fs" id="r-genero">
       <option value="">-- Selecciona --</option><option>Masculino</option><option>Femenino</option>
     </select></div>
-
   <div class="sect-label">Alojamiento</div>
   <div class="fg"><label class="fl">Campamento</label>
     <select class="fs" id="r-camp" onchange="onCampChange()">
@@ -152,7 +146,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
       <option value="">-- Selecciona --</option>
       <option>Cama Superior</option><option>Cama Inferior</option>
     </select></div>
-
   <div class="sect-label">Régimen de turno</div>
   <div class="fg"><label class="fl">Régimen</label>
     <select class="fs" id="r-regimen" onchange="onRegimenChange()">
@@ -171,7 +164,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
     </div>
   </div>
-
   <div class="err" id="reg-err"></div>
   <button class="btn b-acc" onclick="registrarNuevo()" style="margin-top:4px">REGISTRARME Y MARCAR ENTRADA</button>
   <button class="btn b-out" onclick="goHome()" style="margin-top:8px">← VOLVER</button>
@@ -197,7 +189,12 @@ function tick(){const n=new Date();document.getElementById('clock').textContent=
 tick();setInterval(tick,1000);
 
 function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
-function goHome(){worker=null;turnoSel='';turnoRegSel='';document.getElementById('dni-field').value='';document.getElementById('dni-err').textContent='';show('s-dni');setTimeout(()=>document.getElementById('dni-field').focus(),200);}
+function goHome(){worker=null;turnoSel='';turnoRegSel='';document.getElementById('dni-field').value='';document.getElementById('dni-err').textContent='';show('s-dni');}
+
+function api(params){
+  const url=API+'?'+new URLSearchParams(params).toString();
+  return fetch(url).then(r=>r.json());
+}
 
 async function buscarDNI(){
   const dni=document.getElementById('dni-field').value.trim();
@@ -206,8 +203,7 @@ async function buscarDNI(){
   document.getElementById('load-msg').textContent='Buscando tu registro...';
   show('s-load');
   try{
-    const r=await fetch(`${API}?action=buscar&dni=${encodeURIComponent(dni)}`);
-    const j=await r.json();
+    const j=await api({action:'buscar',dni});
     if(j.error)throw new Error(j.error);
     if(j.data.encontrado){worker=j.data;renderCard();show('s-checkin');}
     else{await cargarConfig();document.getElementById('r-dni').value=dni;show('s-reg');}
@@ -247,13 +243,14 @@ async function marcar(accion){
   document.getElementById('load-msg').textContent=accion==='ENTRADA'?'Registrando tu entrada...':'Registrando tu salida...';
   show('s-load');
   try{
-    const r=await fetch(API,{method:'POST',body:JSON.stringify({
-      action:'marcar',dni:worker.dni,nombre:worker.nombre,apellidos:worker.apellidos,
-      accion,regimen:worker.regimen,turno:worker.regimen==='14x7'?turnoSel:'',
+    const j=await api({
+      action:'marcar',dni:worker.dni,
+      nombre:worker.nombre,apellidos:worker.apellidos,
+      accion,regimen:worker.regimen,
+      turno:worker.regimen==='14x7'?turnoSel:'',
       campamento:worker.campamento,sector:worker.sector,
       habitacion:worker.habitacion||worker.compartimiento||''
-    })});
-    const j=await r.json();
+    });
     if(j.error)throw new Error(j.error);
     mostrarExito(accion);
   }catch(e){mostrarError(e.message);}
@@ -261,7 +258,7 @@ async function marcar(accion){
 
 async function cargarConfig(){
   if(Object.keys(cfg).length>0)return;
-  try{const r=await fetch(`${API}?action=config`);const j=await r.json();if(!j.error)cfg=j.data;}
+  try{const j=await api({action:'config'});if(!j.error)cfg=j.data;}
   catch(e){console.log('cfg err',e);}
 }
 
@@ -291,8 +288,7 @@ function onSectorChange(){
     sel.innerHTML='<option value="">-- Selecciona --</option>';
     const esMod=sector.toLowerCase().includes('módulo')||sector.toLowerCase().includes('modulo');
     document.getElementById('hab-label').textContent=esMod?'Número de módulo':'Número de habitación';
-    const lista=(data&&data.habitaciones&&data.habitaciones.length>0)?data.habitaciones:
-                (data&&data.compartimientos?data.compartimientos:[]);
+    const lista=(data&&data.habitaciones&&data.habitaciones.length>0)?data.habitaciones:(data&&data.compartimientos?data.compartimientos:[]);
     lista.forEach(h=>sel.innerHTML+=`<option>${h}</option>`);
     document.getElementById('wrap-hab').style.display='block';
     document.getElementById('wrap-comp').style.display='none';
@@ -322,10 +318,11 @@ async function registrarNuevo(){
   const esB=camp.includes('B');
   const comp=esB?document.getElementById('r-comp').value:'';
   const hab=!esB?document.getElementById('r-hab').value:'';
-  const cama=document.getElementById('r-cama').style.display!=='none'?document.getElementById('r-cama').value:'';
+  const camaEl=document.getElementById('r-cama');
+  const cama=document.getElementById('wrap-cama').style.display!=='none'?camaEl.value:'';
 
   if(!nombre||!apellidos||!cargo||!genero||!camp||!sector||!regimen){
-    document.getElementById('reg-err').textContent='⚠ Completa todos los campos obligatorios.';return;}
+    document.getElementById('reg-err').textContent='⚠ Completa todos los campos.';return;}
   if(esB&&!comp){document.getElementById('reg-err').textContent='⚠ Selecciona el compartimiento.';return;}
   if(!esB&&!hab){document.getElementById('reg-err').textContent='⚠ Selecciona la habitación o módulo.';return;}
   if(regimen==='14x7'&&!turnoRegSel){document.getElementById('reg-err').textContent='⚠ Selecciona tu turno.';return;}
@@ -333,12 +330,11 @@ async function registrarNuevo(){
   document.getElementById('load-msg').textContent='Registrando tus datos...';
   show('s-load');
   try{
-    const r=await fetch(API,{method:'POST',body:JSON.stringify({
+    const j=await api({
       action:'registrar_nuevo',dni,nombre,apellidos,cargo,genero,
       campamento:camp,sector,compartimiento:comp,habitacion:hab,cama,
       regimen,turno:regimen==='14x7'?turnoRegSel:''
-    })});
-    const j=await r.json();
+    });
     if(j.error)throw new Error(j.error);
     mostrarExito('ENTRADA');
   }catch(e){mostrarError(e.message);}
@@ -349,9 +345,7 @@ function mostrarExito(accion){
   document.getElementById('res-box').className='res ok';
   document.getElementById('res-ico').textContent=esE?'✅':'👋';
   document.getElementById('res-tit').textContent=esE?'¡ENTRADA REGISTRADA!':'¡SALIDA REGISTRADA!';
-  document.getElementById('res-sub').textContent=esE
-    ?'Tu ingreso al campamento quedó guardado correctamente.'
-    :'Tu salida quedó registrada. ¡Hasta pronto!';
+  document.getElementById('res-sub').textContent=esE?'Tu ingreso quedó guardado correctamente.':'Tu salida quedó registrada. ¡Hasta pronto!';
   document.getElementById('res-time').textContent=new Date().toLocaleString('es-PE',{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'});
   show('s-result');
 }
