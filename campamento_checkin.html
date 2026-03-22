@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Campamento — Registro</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e1117;--sur:#161c27;--sur2:#1d2535;--bor:rgba(255,255,255,0.08);--acc:#f5a623;--blue:#3b9eff;--green:#2ecc71;--red:#e74c3c;--text:#eef0f4;--mut:#6b7a94}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--sur);border-bottom:1px solid var(--bor);padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.hdr-ico{width:34px;height:34px;background:var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;letter-spacing:1px}
+.hdr-sub{font-size:11px;color:var(--mut)}
+.hdr-clock{margin-left:auto;font-size:13px;color:var(--mut);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px}
+.scr{display:none;flex-direction:column;flex:1;padding:22px 18px 32px;animation:fi .2s ease}
+.scr.on{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.big{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:4px}
+.sub{font-size:13px;color:var(--mut);margin-bottom:22px;line-height:1.6}
+.dni-in{width:100%;background:var(--sur);border:1.5px solid var(--bor);border-radius:12px;padding:16px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--text);letter-spacing:4px;outline:none;text-align:center;transition:border-color .2s}
+.dni-in:focus{border-color:var(--acc)}
+.dni-in::placeholder{color:var(--mut);letter-spacing:1px;font-size:20px}
+.btn{width:100%;padding:15px;border-radius:12px;border:none;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:10px;transition:all .15s;text-transform:uppercase}
+.btn:active{transform:scale(0.97)}
+.b-acc{background:var(--acc);color:#000}
+.b-out{background:transparent;color:var(--text);border:1.5px solid var(--bor)}
+.b-grn{background:var(--green);color:#000}
+.b-red{background:var(--red);color:#fff}
+.card{background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:18px;margin-bottom:14px}
+.wname{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;margin-bottom:2px}
+.wdni{font-size:12px;color:var(--mut);letter-spacing:1px;margin-bottom:14px}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor);font-size:13px}
+.irow:last-child{border-bottom:none}
+.ikey{color:var(--mut);font-size:12px}
+.ival{font-weight:500;text-align:right;max-width:65%}
+.rtag{display:inline-block;padding:3px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px}
+.r14{background:rgba(59,158,255,.15);color:var(--blue)}
+.r6{background:rgba(245,166,35,.15);color:var(--acc)}
+.r5{background:rgba(46,204,113,.15);color:var(--green)}
+.r10{background:rgba(155,89,182,.15);color:#c39bd3}
+.stag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:12px;font-weight:600}
+.s-pre{background:rgba(46,204,113,.15);color:var(--green)}
+.s-aus{background:rgba(231,76,60,.15);color:var(--red)}
+.turno-box{background:var(--sur2);border:1px solid var(--bor);border-radius:12px;padding:14px;margin-bottom:14px}
+.turno-lbl{font-size:11px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.turno-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tbtn{padding:14px;border-radius:10px;border:1.5px solid var(--bor);background:var(--sur);color:var(--mut);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;text-align:center}
+.tbtn.sel{border-color:var(--blue);background:rgba(59,158,255,.12);color:var(--blue)}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:11px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.fi,.fs{width:100%;background:var(--sur);border:1.5px solid var(--bor);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.fi:focus,.fs:focus{border-color:var(--acc)}
+.fs option{background:var(--sur2)}
+.res{border-radius:14px;padding:24px 18px;text-align:center;margin-bottom:16px}
+.res-ico{font-size:48px;margin-bottom:10px}
+.res-tit{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.res-sub{font-size:13px;color:var(--mut);line-height:1.6}
+.res.ok{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2)}
+.res.err{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2)}
+.res-time{font-size:12px;color:var(--mut);text-align:center;margin-bottom:16px}
+.spin{width:34px;height:34px;border:3px solid var(--bor);border-top-color:var(--acc);border-radius:50%;animation:sp .7s linear infinite;margin:40px auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin-msg{text-align:center;color:var(--mut);font-size:13px}
+.notice{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--acc);margin-bottom:14px;line-height:1.5}
+.gap{flex:1}
+.err{font-size:13px;color:var(--red);margin-top:6px;text-align:center;min-height:18px}
+.sect-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--bor)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-ico">⛺</div>
+  <div>
+    <div class="hdr-title">CAMPAMENTO</div>
+    <div class="hdr-sub">Control de Hospedaje</div>
+  </div>
+  <div class="hdr-clock" id="clock">--:--</div>
+</div>
+
+<div class="scr on" id="s-dni">
+  <div class="big">¡Hola!<br>Ingresa tu DNI</div>
+  <div class="sub">Escribe tu número de documento sin puntos ni guiones.</div>
+  <input class="dni-in" id="dni-field" type="tel" maxlength="12" placeholder="Ej: 12345678" autocomplete="off" onkeydown="if(event.key==='Enter')buscarDNI()">
+  <div class="err" id="dni-err"></div>
+  <div class="gap"></div>
+  <button class="btn b-acc" onclick="buscarDNI()">CONTINUAR →</button>
+</div>
+
+<div class="scr" id="s-load">
+  <div class="gap"></div>
+  <div class="spin"></div>
+  <div class="spin-msg" id="load-msg">Buscando tu registro...</div>
+  <div class="gap"></div>
+</div>
+
+<div class="scr" id="s-checkin">
+  <div class="card" id="worker-card"></div>
+  <div class="turno-box" id="turno-wrap" style="display:none">
+    <div class="turno-lbl">Régimen 14x7 — ¿En qué turno estás hoy?</div>
+    <div class="turno-grid">
+      <button class="tbtn" id="btn-dia" onclick="selTurno('Turno Día')">☀️ TURNO DÍA</button>
+      <button class="tbtn" id="btn-noche" onclick="selTurno('Turno Noche')">🌙 TURNO NOCHE</button>
+    </div>
+    <div class="err" id="turno-err"></div>
+  </div>
+  <div class="act-grid">
+    <button class="btn b-grn" onclick="marcar('ENTRADA')">✔ ENTRADA</button>
+    <button class="btn b-red" onclick="marcar('SALIDA')">✖ SALIDA</button>
+  </div>
+  <button class="btn b-out" onclick="goHome()" style="margin-top:8px">← VOLVER</button>
+</div>
+
+<div class="scr" id="s-reg">
+  <div class="big">Primera vez</div>
+  <div class="sub">Tu DNI no está en el sistema. Completa tus datos — solo lo haces una vez.</div>
+  <div class="notice">📋 La próxima vez solo ingresas tu DNI y tus datos cargarán solos.</div>
+
+  <div class="sect-label">Datos personales</div>
+  <div class="fg"><label class="fl">DNI</label><input class="fi" id="r-dni" type="tel" readonly style="color:var(--acc)"></div>
+  <div class="fg"><label class="fl">Nombres</label><input class="fi" id="r-nombre" type="text" placeholder="Ej: Juan Carlos"></div>
+  <div class="fg"><label class="fl">Apellidos</label><input class="fi" id="r-apellido" type="text" placeholder="Ej: Pérez González"></div>
+  <div class="fg"><label class="fl">Cargo</label>
+    <select class="fs" id="r-cargo">
+      <option value="">-- Selecciona --</option>
+      <option>Operario</option><option>Supervisor</option><option>Jefe</option><option>Superintendente</option>
+    </select></div>
+  <div class="fg"><label class="fl">Género</label>
+    <select class="fs" id="r-genero">
+      <option value="">-- Selecciona --</option><option>Masculino</option><option>Femenino</option>
+    </select></div>
+
+  <div class="sect-label">Alojamiento</div>
+  <div class="fg"><label class="fl">Campamento</label>
+    <select class="fs" id="r-camp" onchange="onCampChange()">
+      <option value="">-- Selecciona --</option>
+      <option>Campamento A</option><option>Campamento B</option>
+    </select></div>
+  <div class="fg"><label class="fl">Sector</label>
+    <select class="fs" id="r-sector" onchange="onSectorChange()">
+      <option value="">-- Selecciona campamento primero --</option>
+    </select></div>
+  <div class="fg" id="wrap-comp" style="display:none"><label class="fl">Compartimiento</label>
+    <select class="fs" id="r-comp"><option value="">-- Selecciona --</option></select></div>
+  <div class="fg" id="wrap-hab" style="display:none"><label class="fl" id="hab-label">Habitación / Módulo</label>
+    <select class="fs" id="r-hab"><option value="">-- Selecciona --</option></select></div>
+  <div class="fg" id="wrap-cama" style="display:none"><label class="fl">Cama</label>
+    <select class="fs" id="r-cama">
+      <option value="">-- Selecciona --</option>
+      <option>Cama Superior</option><option>Cama Inferior</option>
+    </select></div>
+
+  <div class="sect-label">Régimen de turno</div>
+  <div class="fg"><label class="fl">Régimen</label>
+    <select class="fs" id="r-regimen" onchange="onRegimenChange()">
+      <option value="">-- Selecciona --</option>
+      <option value="5x2">5x2</option>
+      <option value="10x4">10x4</option>
+      <option value="6x1">6x1</option>
+      <option value="14x7">14x7</option>
+    </select></div>
+  <div id="wrap-turno-reg" style="display:none">
+    <div class="turno-box">
+      <div class="turno-lbl">Régimen 14x7 — Selecciona tu turno</div>
+      <div class="turno-grid">
+        <button class="tbtn" id="reg-btn-dia" onclick="selTurnoReg('Turno Día')">☀️ TURNO DÍA</button>
+        <button class="tbtn" id="reg-btn-noche" onclick="selTurnoReg('Turno Noche')">🌙 TURNO NOCHE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="err" id="reg-err"></div>
+  <button class="btn b-acc" onclick="registrarNuevo()" style="margin-top:4px">REGISTRARME Y MARCAR ENTRADA</button>
+  <button class="btn b-out" onclick="goHome()" style="margin-top:8px">← VOLVER</button>
+</div>
+
+<div class="scr" id="s-result">
+  <div class="gap"></div>
+  <div class="res" id="res-box">
+    <div class="res-ico" id="res-ico"></div>
+    <div class="res-tit" id="res-tit"></div>
+    <div class="res-sub" id="res-sub"></div>
+  </div>
+  <div class="res-time" id="res-time"></div>
+  <div class="gap"></div>
+  <button class="btn b-out" onclick="goHome()">← NUEVO REGISTRO</button>
+</div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycby7KV8L41cMaW1jWWUD4Lsi26Rnc5j0qWB5Kvjny109dgQlrtqtzYmxRj5URB2nKm5iIQ/exec';
+let worker=null,turnoSel='',turnoRegSel='',cfg={};
+
+function tick(){const n=new Date();document.getElementById('clock').textContent=n.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});}
+tick();setInterval(tick,1000);
+
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function goHome(){worker=null;turnoSel='';turnoRegSel='';document.getElementById('dni-field').value='';document.getElementById('dni-err').textContent='';show('s-dni');setTimeout(()=>document.getElementById('dni-field').focus(),200);}
+
+async function buscarDNI(){
+  const dni=document.getElementById('dni-field').value.trim();
+  if(!dni||dni.length<6){document.getElementById('dni-err').textContent='Ingresa un DNI válido.';return;}
+  document.getElementById('dni-err').textContent='';
+  document.getElementById('load-msg').textContent='Buscando tu registro...';
+  show('s-load');
+  try{
+    const r=await fetch(`${API}?action=buscar&dni=${encodeURIComponent(dni)}`);
+    const j=await r.json();
+    if(j.error)throw new Error(j.error);
+    if(j.data.encontrado){worker=j.data;renderCard();show('s-checkin');}
+    else{await cargarConfig();document.getElementById('r-dni').value=dni;show('s-reg');}
+  }catch(e){mostrarError('Error de conexión: '+e.message);}
+}
+
+function renderCard(){
+  const rm={'5x2':'r5','10x4':'r10','6x1':'r6','14x7':'r14'};
+  const rc=rm[worker.regimen]||'r6';
+  const ti=worker.regimen==='14x7'?`<span style="color:var(--blue);font-size:12px;margin-left:6px">${worker.turno||'por confirmar'}</span>`:'';
+  const est=worker.estado==='PRESENTE'?'<span class="stag s-pre">PRESENTE</span>':'<span class="stag s-aus">AUSENTE</span>';
+  const esB=String(worker.campamento).includes('B');
+  const ubicRow=esB
+    ?`<div class="irow"><span class="ikey">Compartimiento</span><span class="ival">${worker.compartimiento||'—'}</span></div>`
+    :`<div class="irow"><span class="ikey">Habitación / Módulo</span><span class="ival">${worker.habitacion||'—'}</span></div>`;
+  const camaRow=esB&&worker.cama?`<div class="irow"><span class="ikey">Cama</span><span class="ival">${worker.cama}</span></div>`:'';
+  document.getElementById('worker-card').innerHTML=`
+    <div class="wname">${worker.nombre} ${worker.apellidos}</div>
+    <div class="wdni">DNI: ${worker.dni} &nbsp;·&nbsp; ${worker.cargo} &nbsp;·&nbsp; ${est}</div>
+    <div class="irow"><span class="ikey">Campamento</span><span class="ival">${worker.campamento}</span></div>
+    <div class="irow"><span class="ikey">Sector</span><span class="ival">${worker.sector}</span></div>
+    ${ubicRow}${camaRow}
+    <div class="irow"><span class="ikey">Régimen</span><span class="ival"><span class="rtag ${rc}">${worker.regimen}</span>${ti}</span></div>`;
+  const tw=document.getElementById('turno-wrap');
+  if(worker.regimen==='14x7'){tw.style.display='block';turnoSel=worker.turno||'';actualizarBtns();}
+  else{tw.style.display='none';turnoSel='';}
+}
+
+function selTurno(t){turnoSel=t;document.getElementById('turno-err').textContent='';actualizarBtns();}
+function actualizarBtns(){
+  document.getElementById('btn-dia').className='tbtn'+(turnoSel==='Turno Día'?' sel':'');
+  document.getElementById('btn-noche').className='tbtn'+(turnoSel==='Turno Noche'?' sel':'');
+}
+
+async function marcar(accion){
+  if(worker.regimen==='14x7'&&!turnoSel){document.getElementById('turno-err').textContent='⚠ Selecciona el turno primero.';return;}
+  document.getElementById('load-msg').textContent=accion==='ENTRADA'?'Registrando tu entrada...':'Registrando tu salida...';
+  show('s-load');
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({
+      action:'marcar',dni:worker.dni,nombre:worker.nombre,apellidos:worker.apellidos,
+      accion,regimen:worker.regimen,turno:worker.regimen==='14x7'?turnoSel:'',
+      campamento:worker.campamento,sector:worker.sector,
+      habitacion:worker.habitacion||worker.compartimiento||''
+    })});
+    const j=await r.json();
+    if(j.error)throw new Error(j.error);
+    mostrarExito(accion);
+  }catch(e){mostrarError(e.message);}
+}
+
+async function cargarConfig(){
+  if(Object.keys(cfg).length>0)return;
+  try{const r=await fetch(`${API}?action=config`);const j=await r.json();if(!j.error)cfg=j.data;}
+  catch(e){console.log('cfg err',e);}
+}
+
+function onCampChange(){
+  const camp=document.getElementById('r-camp').value;
+  const sel=document.getElementById('r-sector');
+  sel.innerHTML='<option value="">-- Selecciona sector --</option>';
+  ['wrap-comp','wrap-hab','wrap-cama'].forEach(id=>document.getElementById(id).style.display='none');
+  if(cfg[camp])Object.keys(cfg[camp]).forEach(s=>sel.innerHTML+=`<option value="${s}">${s}</option>`);
+}
+
+function onSectorChange(){
+  const camp=document.getElementById('r-camp').value;
+  const sector=document.getElementById('r-sector').value;
+  if(!sector)return;
+  const esB=camp.includes('B');
+  const data=cfg[camp]&&cfg[camp][sector];
+  if(esB){
+    const sel=document.getElementById('r-comp');
+    sel.innerHTML='<option value="">-- Selecciona --</option>';
+    if(data&&data.compartimientos)data.compartimientos.forEach(c=>sel.innerHTML+=`<option>${c}</option>`);
+    document.getElementById('wrap-comp').style.display='block';
+    document.getElementById('wrap-cama').style.display='block';
+    document.getElementById('wrap-hab').style.display='none';
+  }else{
+    const sel=document.getElementById('r-hab');
+    sel.innerHTML='<option value="">-- Selecciona --</option>';
+    const esMod=sector.toLowerCase().includes('módulo')||sector.toLowerCase().includes('modulo');
+    document.getElementById('hab-label').textContent=esMod?'Número de módulo':'Número de habitación';
+    const lista=(data&&data.habitaciones&&data.habitaciones.length>0)?data.habitaciones:
+                (data&&data.compartimientos?data.compartimientos:[]);
+    lista.forEach(h=>sel.innerHTML+=`<option>${h}</option>`);
+    document.getElementById('wrap-hab').style.display='block';
+    document.getElementById('wrap-comp').style.display='none';
+    document.getElementById('wrap-cama').style.display=esMod?'block':'none';
+  }
+}
+
+function onRegimenChange(){
+  const reg=document.getElementById('r-regimen').value;
+  document.getElementById('wrap-turno-reg').style.display=reg==='14x7'?'block':'none';
+}
+function selTurnoReg(t){
+  turnoRegSel=t;
+  document.getElementById('reg-btn-dia').className='tbtn'+(t==='Turno Día'?' sel':'');
+  document.getElementById('reg-btn-noche').className='tbtn'+(t==='Turno Noche'?' sel':'');
+}
+
+async function registrarNuevo(){
+  const dni=document.getElementById('r-dni').value.trim();
+  const nombre=document.getElementById('r-nombre').value.trim();
+  const apellidos=document.getElementById('r-apellido').value.trim();
+  const cargo=document.getElementById('r-cargo').value;
+  const genero=document.getElementById('r-genero').value;
+  const camp=document.getElementById('r-camp').value;
+  const sector=document.getElementById('r-sector').value;
+  const regimen=document.getElementById('r-regimen').value;
+  const esB=camp.includes('B');
+  const comp=esB?document.getElementById('r-comp').value:'';
+  const hab=!esB?document.getElementById('r-hab').value:'';
+  const cama=document.getElementById('r-cama').style.display!=='none'?document.getElementById('r-cama').value:'';
+
+  if(!nombre||!apellidos||!cargo||!genero||!camp||!sector||!regimen){
+    document.getElementById('reg-err').textContent='⚠ Completa todos los campos obligatorios.';return;}
+  if(esB&&!comp){document.getElementById('reg-err').textContent='⚠ Selecciona el compartimiento.';return;}
+  if(!esB&&!hab){document.getElementById('reg-err').textContent='⚠ Selecciona la habitación o módulo.';return;}
+  if(regimen==='14x7'&&!turnoRegSel){document.getElementById('reg-err').textContent='⚠ Selecciona tu turno.';return;}
+  document.getElementById('reg-err').textContent='';
+  document.getElementById('load-msg').textContent='Registrando tus datos...';
+  show('s-load');
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({
+      action:'registrar_nuevo',dni,nombre,apellidos,cargo,genero,
+      campamento:camp,sector,compartimiento:comp,habitacion:hab,cama,
+      regimen,turno:regimen==='14x7'?turnoRegSel:''
+    })});
+    const j=await r.json();
+    if(j.error)throw new Error(j.error);
+    mostrarExito('ENTRADA');
+  }catch(e){mostrarError(e.message);}
+}
+
+function mostrarExito(accion){
+  const esE=accion==='ENTRADA';
+  document.getElementById('res-box').className='res ok';
+  document.getElementById('res-ico').textContent=esE?'✅':'👋';
+  document.getElementById('res-tit').textContent=esE?'¡ENTRADA REGISTRADA!':'¡SALIDA REGISTRADA!';
+  document.getElementById('res-sub').textContent=esE
+    ?'Tu ingreso al campamento quedó guardado correctamente.'
+    :'Tu salida quedó registrada. ¡Hasta pronto!';
+  document.getElementById('res-time').textContent=new Date().toLocaleString('es-PE',{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'});
+  show('s-result');
+}
+function mostrarError(msg){
+  document.getElementById('res-box').className='res err';
+  document.getElementById('res-ico').textContent='❌';
+  document.getElementById('res-tit').textContent='ERROR';
+  document.getElementById('res-sub').textContent=msg||'Algo salió mal. Intenta de nuevo.';
+  document.getElementById('res-time').textContent='';
+  show('s-result');
+}
+</script>
+</body>
+</html>
