@@ -7,14 +7,10 @@ const TOKEN = '8545753030:AAFzvYB9x-7oTa4U5eeIbe58RiwFzwf2z0s';
 const TELEGRAM = `https://api.telegram.org/bot${TOKEN}`;
 const SHEET_API = 'https://script.google.com/macros/s/AKfycbxMk5piQaBgdWZtG2-xZwYNqi4WHTXeLhAaaFVynFlsn4gB9wGrrjgzHtHuC7yeAzpQCQ/exec';
 
-// Estructura fija Campamento B
 const SECTORES = [
   'Carpa 1','Carpa 2','Carpa 3','Carpa 4','Carpa 5','Carpa 6','Carpa 7',
   'Carpa 8','Carpa 9','Carpa 10','Carpa 11','Carpa 12','Carpa 13','Contenedor 5'
 ];
-const COMPARTIMIENTOS = ['1','2','3','4','5','6','7','8','9'];
-const CAMAS = ['Cama 1 Superior','Cama 1 Inferior','Cama 2 Superior','Cama 2 Inferior'];
-const REGIMENES = ['5x2','10x4','6x1','14x7'];
 
 const estados = {};
 function estado(chatId) {
@@ -42,7 +38,6 @@ async function apiSheet(params) {
   return r.data;
 }
 
-// Botones de sectores (carpas) - 2 por fila
 function btnsCarpa() {
   const btns = [];
   for (let i = 0; i < SECTORES.length; i += 2)
@@ -50,18 +45,20 @@ function btnsCarpa() {
   return btns;
 }
 
-// Botones compartimientos - 3 por fila
 function btnsComp() {
   return [['1','2','3'],['4','5','6'],['7','8','9']];
 }
 
-// Botones camas
-function btnsCama(sector) {
-  // Contenedor 5 solo tiene 1 camarote por compartimiento
-  if (sector === 'Contenedor 5')
+function btnsCama(camarotes) {
+  if (camarotes === '1 camarote')
     return [['Cama 1 Superior','Cama 1 Inferior']];
-  // Carpas pueden tener 2 camarotes
-  return [['Cama 1 Superior','Cama 1 Inferior'],['Cama 2 Superior','Cama 2 Inferior']];
+  // 2 camarotes = 4 camas
+  return [
+    ['Cama 1 Superior','Cama 1 Inferior'],
+    ['Cama 2 Superior','Cama 2 Inferior'],
+    ['Cama 3 Superior','Cama 3 Inferior'],
+    ['Cama 4 Superior','Cama 4 Inferior']
+  ];
 }
 
 async function procesarMensaje(chatId, texto) {
@@ -121,13 +118,13 @@ async function procesarMensaje(chatId, texto) {
     return;
   }
 
-  // REGISTRO - pasos de texto
   if (e.paso === 'reg_nombre') {
     e.data.nombre = texto.trim();
     e.paso = 'reg_apellido';
     await send(chatId,'¿Cuáles son tus <b>apellidos</b>?');
     return;
   }
+
   if (e.paso === 'reg_apellido') {
     e.data.apellidos = texto.trim();
     e.paso = 'reg_cargo';
@@ -136,7 +133,6 @@ async function procesarMensaje(chatId, texto) {
     return;
   }
 
-  // TURNO usuario registrado 14x7
   if (e.paso === 'esperando_turno') {
     const turno = texto.includes('Día') ? 'Turno Día' : 'Turno Noche';
     e.data.turno = turno;
@@ -146,14 +142,12 @@ async function procesarMensaje(chatId, texto) {
     return;
   }
 
-  // ACCION usuario registrado
   if (e.paso === 'esperando_accion') {
     const accion = texto.includes('ENTRADA') ? 'ENTRADA' : 'SALIDA';
     await ejecutarMarcar(chatId, e, accion);
     return;
   }
 
-  // DEFAULT
   e.paso = 'esperando_dni';
   e.data = {};
   await send(chatId,'Ingresa tu <b>DNI</b> para comenzar:');
@@ -225,7 +219,6 @@ async function finalizarRegistro(chatId, e) {
 async function procesarCallback(chatId, data, callbackId, messageId) {
   const e = estado(chatId);
 
-  // Quitar botones del mensaje anterior
   await axios.post(`${TELEGRAM}/editMessageReplyMarkup`,{
     chat_id:chatId, message_id:messageId,
     reply_markup:{inline_keyboard:[]}
@@ -234,7 +227,6 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
     callback_query_id:callbackId
   }).catch(()=>{});
 
-  // REGISTRO
   if (e.paso==='reg_cargo') {
     e.data.cargo = data;
     e.paso = 'reg_genero';
@@ -251,15 +243,32 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
   if (e.paso==='reg_sector') {
     e.data.sector = data;
     e.paso = 'reg_compartimiento';
-    await send(chatId,`${data}\n\n¿Cuál es tu <b>compartimiento</b>?`, btnsComp());
+    await send(chatId,`${data}\n\n¿Cuál es tu <b>número de compartimiento</b>?`, btnsComp());
     return;
   }
   if (e.paso==='reg_compartimiento') {
     e.data.compartimiento = data;
+    // Contenedor 5 siempre tiene 1 camarote — va directo a cama
+    if (e.data.sector === 'Contenedor 5') {
+      e.data.camarotes = '1 camarote';
+      e.paso = 'reg_cama';
+      await send(chatId,
+        `Compartimiento <b>${data}</b>\n\n¿Cuál es tu <b>cama</b>?`,
+        btnsCama('1 camarote'));
+    } else {
+      e.paso = 'reg_camarotes';
+      await send(chatId,
+        `Compartimiento <b>${data}</b>\n\n¿Cuántos camarotes tiene tu compartimiento?`,
+        [['1 camarote','2 camarotes']]);
+    }
+    return;
+  }
+  if (e.paso==='reg_camarotes') {
+    e.data.camarotes = data;
     e.paso = 'reg_cama';
     await send(chatId,
-      `Compartimiento <b>${data}</b>\n\n¿Cuál es tu <b>cama</b>?`,
-      btnsCama(e.data.sector));
+      `${data} — ¿Cuál es tu <b>cama</b>?`,
+      btnsCama(data));
     return;
   }
   if (e.paso==='reg_cama') {
@@ -273,7 +282,7 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
     e.data.regimen = data;
     if (data==='14x7') {
       e.paso = 'reg_turno';
-      await send(chatId,`Régimen: <b>14x7</b>\n\n¿En qué <b>turno</b> estás?`,
+      await send(chatId,`Régimen: <b>14x7</b>\n\n¿En qué <b>turno</b> estás actualmente?`,
         [['☀️ Turno Día','🌙 Turno Noche']]);
     } else {
       await finalizarRegistro(chatId, e);
@@ -286,9 +295,13 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
     return;
   }
 
-  // Usuario registrado — turno y accion
+  // Usuario ya registrado
   if (e.paso==='esperando_turno') {
-    await procesarMensaje(chatId, data);
+    const turno = data.includes('Día') ? 'Turno Día' : 'Turno Noche';
+    e.data.turno = turno;
+    e.paso = 'esperando_accion';
+    await send(chatId,`Turno: <b>${turno}</b>\n\n¿Qué registras?`,
+      [['✅ ENTRADA','🚪 SALIDA']]);
     return;
   }
   if (e.paso==='esperando_accion') {
@@ -297,7 +310,6 @@ async function procesarCallback(chatId, data, callbackId, messageId) {
     return;
   }
 
-  // Default
   await procesarMensaje(chatId, data);
 }
 
